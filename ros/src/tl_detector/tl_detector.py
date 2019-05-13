@@ -7,6 +7,7 @@ from styx_msgs.msg import Lane
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from light_classification.tl_classifier import TLClassifier
+from scipy.spatial import KDTree
 import tf
 import cv2
 import yaml
@@ -101,7 +102,10 @@ class TLDetector(object):
 
         """
         #TODO implement
-        return 0
+        if self.waypints_tree:
+            return self.waypoints_tree.query([x,y], 1)[1]
+        else:
+            return 0
 
     def get_light_state(self, light):
         """Determines the current color of the traffic light
@@ -139,8 +143,20 @@ class TLDetector(object):
             car_position = self.get_closest_waypoint(self.pose.pose)
 
         #TODO find the closest visible traffic light (if one exists)
+        diff = len(self.waypoints.waypoints)
+        for i, closest_light in enumerate(self.lights):
+            #Get stop line waypoint index
+            line = stop_line_positions[i]
+            temp_position = self.get_closest_waypoint(line)
+            # Find closest stop line waypoint index
+            d = temp_position - car_position
+            if d >= 0 and d < diff:
+                diff = d
+                light = closest_light;
+                light_wp = temp_position
 
         if light:
+            print("Inside Light", light_wp, light)
             state = self.get_light_state(light)
             return light_wp, state
         self.waypoints = None
