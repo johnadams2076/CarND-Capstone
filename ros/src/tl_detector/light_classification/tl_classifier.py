@@ -26,7 +26,14 @@ class TLClassifier(object):
         image_fin = cv2.resize(image, image_dim, interpolation=cv2.INTER_LINEAR)
         image = np.expand_dims(np.array(image_fin), axis=0)
 
+        color_index = -1
         color_index =  np.argmax(self.model.predict_classes(image))
         print("Color Index", color_index)
-        return color_index
-        #return TrafficLight.UNKNOWN
+        if color_index == 0:
+            return TrafficLight.RED
+        if color_index == 1:
+            return TrafficLight.YELLOW
+        if color_index == 2:
+            return TrafficLight.GREEN
+
+        return TrafficLight.UNKNOWN
